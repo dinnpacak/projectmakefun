@@ -12,6 +12,6 @@ WASD moves, mouse aims, left click fires, R reloads, Space jumps, Ctrl crouches.
 
 The HUD shows health, credits, kills, round record, objective and time. Stationary shots are more accurate than moving shots. Headshots eliminate in one hit. Grenades consume $450 and simulate in the same paused fixed-step clock as combat.
 
-Validation: round-economy, paused-clock, held-plant, objective-completion, lethal-damage and no-mid-round-respawn tests pass. Real browser captures accompany the dossier. Screenshot query modes are illustrative staged views, not proof of a played victory.
+Validation: round-economy, paused-clock, held-plant, objective-completion, lethal-damage and no-mid-round-respawn tests pass. Round reset clears live grenades, their GPU resources, movement velocity and the simulation remainder. Normal animated Chromium testing verifies deploy, firing, a completed reload to 30 rounds, pause and resume without page errors. Real browser captures accompany the dossier. Screenshot query modes are illustrative staged views, not proof of a played victory.
 
 Built for [make.fun's tactical FPS bounty](https://make.fun/bounty/threejs-fps-02). MIT licensed.

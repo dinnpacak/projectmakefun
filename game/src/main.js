@@ -54,6 +54,15 @@ targets.onPlayerDamage(amount=>{
  setTimeout(()=>damage.classList.remove('show'),140);
 });
 function resetRound(){
+ // A new deployment owns a fresh simulation; no live explosive crosses rounds.
+ for(const grenade of grenades){
+  scene.remove(grenade.mesh);
+  grenade.mesh.geometry.dispose();
+  grenade.mesh.material.dispose();
+ }
+ grenades.length=0;
+ player.state.velocity.set(0,0,0);
+ elapsed=0;accumulator=0;
  player.state.position.set(0,0,9.5);targets.reset();weapon.refill();
  weapon.configure(STORE[rules.selected].mag,STORE[rules.selected].reserve);
  relay.material.color.set(0xd38a57);armory=true;hud.showOverlay('start',score());
