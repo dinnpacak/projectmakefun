@@ -12,7 +12,7 @@ mkdirSync(output,{recursive:true});
 cpSync(game,join(output,'game'),{recursive:true});
 mkdirSync(join(output,'screenshots'),{recursive:true});
 // Copy only committed presentation images, never temporary browser output.
-for(const name of ['1-start.jpg','2-play.jpg','3-end.jpg']){
+for(const name of ['1-start.png','2-play.png','3-relay.png','4-end.png']){
  const source=join(captures,name);
  if(!existsSync(source))throw Error('Missing browser capture: '+name);
  cpSync(source,join(output,'screenshots',name));
