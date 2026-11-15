@@ -22,6 +22,16 @@ export function createHud() {
   let lastScore = -1;
 
   return {
+    setVitals(health, selected) {
+      document.getElementById('health-value').textContent = Math.ceil(health);
+      document.getElementById('health-fill').style.width = Math.max(0,Math.min(100,health))+'%';
+      for(const slot of document.querySelectorAll('[data-weapon]')) slot.classList.toggle('selected',slot.dataset.weapon===selected);
+    },
+    damageNumber(amount, x, y, holdMs=650) {
+      const node=document.getElementById('damage-number');
+      node.textContent=String(amount);node.style.left=x+'px';node.style.top=y+'px';node.classList.add('show');
+      clearTimeout(this.damageTimer);this.damageTimer=setTimeout(()=>node.classList.remove('show'),holdMs);
+    },
     setAmmo(mag, reserve) {
       if (mag === lastMag && reserve === lastReserve) return;
       lastMag = mag;

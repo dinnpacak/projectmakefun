@@ -5,8 +5,8 @@ import { PALETTE } from './palette.js';
 const SPAWNS = [[-7.5,-8],[-3.5,-9],[3.5,-9],[7.5,-8],[0,-6]];
 const HEALTH=100, RESPAWN_SECONDS=4, FALL_SECONDS=.35;
 export function createTargets(scene){
- const bodyMat=new THREE.MeshStandardMaterial({color:0xb44c45,roughness:.72}), headMat=new THREE.MeshStandardMaterial({color:0xe8a774,roughness:.55}), gearMat=new THREE.MeshStandardMaterial({color:0x293b43,metalness:.22,roughness:.62}), glowMat=new THREE.MeshBasicMaterial({color:0xff624f});
- const torsoGeo=new THREE.BoxGeometry(.54,.8,.34), headGeo=new THREE.SphereGeometry(.17,16,12), postGeo=new THREE.BoxGeometry(.12,.5,.12), baseGeo=new THREE.BoxGeometry(.52,.08,.52);
+ const bodyMat=new THREE.MeshStandardMaterial({color:0x9848df,roughness:1}), headMat=new THREE.MeshStandardMaterial({color:0xc17aff,roughness:1}), gearMat=new THREE.MeshStandardMaterial({color:0x51317d,roughness:1}), glowMat=new THREE.MeshBasicMaterial({color:0x86f1ff});
+ const torsoGeo=new THREE.BoxGeometry(.64,.8,.4), headGeo=new THREE.BoxGeometry(.38,.38,.38), postGeo=new THREE.BoxGeometry(.12,.5,.12), baseGeo=new THREE.BoxGeometry(.52,.08,.52);
  const items=[], hitMeshes=[]; let now=0, healthCallback=()=>{};
  for(let i=0;i<SPAWNS.length;i++){
   const [x,z]=SPAWNS[i], group=new THREE.Group(); group.position.set(x,0,z);
@@ -15,7 +15,11 @@ export function createTargets(scene){
   const head=new THREE.Mesh(headGeo,headMat); head.position.y=1.55; head.userData.part='head';
   const pack=new THREE.Mesh(new THREE.BoxGeometry(.28,.42,.18),gearMat); pack.position.set(0,1.02,.23);
   const lamp=new THREE.Mesh(new THREE.SphereGeometry(.045,8,8),glowMat); lamp.position.set(0,1.04,-.19);
-  group.add(base,post,torso,head,pack,lamp); group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}}); scene.add(group);
+  const limb=(w,h,d,x,y,z,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);group.add(m);};
+  limb(.22,.52,.27,-.19,.32,0,gearMat);limb(.22,.52,.27,.19,.32,0,gearMat);
+  limb(.22,.65,.27,-.44,1.03,0,bodyMat);limb(.22,.65,.27,.44,1.03,0,bodyMat);
+  limb(.29,.1,.025,0,1.58,-.205,glowMat);
+  group.add(base,torso,head,pack); group.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}}); scene.add(group);
   const item={group,torso,head,health:HEALTH,alive:true,fall:0,respawnAt:0,phase:i*1.9,home:new THREE.Vector3(x,0,z),waypoint:i%2?1:-1,fire:1+i*.33,flash:0,side:i<3?'DEFENDERS':'RAIDERS'};
   torso.userData.target=item; head.userData.target=item; hitMeshes.push(torso,head); items.push(item);
  }

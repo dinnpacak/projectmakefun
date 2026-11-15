@@ -19,7 +19,7 @@ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 document.getElementById('game').appendChild(renderer.domElement);
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(PALETTE.canvas);
-scene.fog=new THREE.Fog(PALETTE.canvas,18,46);
+scene.fog=new THREE.Fog(PALETTE.canvas,30,90);
 const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.05,140);
 scene.add(camera);
 const world=createWorld(scene),targets=createTargets(scene),weapon=createWeapon(camera);
@@ -76,7 +76,10 @@ function shoot(){
  const living=targets.items.filter(t=>t.alive).flatMap(t=>[t.torso,t.head]);
  const hit=ray.intersectObjects(world.shootables.concat(living),false)[0];
  if(hit?.object.userData.target){
-  const killed=targets.damage(hit.object,hit.object.userData.part==='head'?100:34);
+  const amount=hit.object.userData.part==='head'?100:34;
+  const killed=targets.damage(hit.object,amount);
+  const projected=hit.point.clone().add(new THREE.Vector3(0,.65,0)).project(camera);
+  hud.damageNumber(amount,(projected.x+1)*innerWidth/2,(1-projected.y)*innerHeight/2);
   if(killed)rules.confirmKill();hud.hitMarker(killed,shot?4000:90);
  }
  weapon.pullTrigger();player.recoil(.009+random()*.004,(random()*2-1)*.004);
@@ -122,7 +125,7 @@ window.addEventListener('keydown',event=>{
  if(event.code==='KeyG'&&input.state.locked&&rules.phase==='LIVE')throwGrenade();
 });
 function updateHud(){
- hud.setAmmo(weapon.state.mag,weapon.state.reserve);hud.setScore(score());
+ hud.setAmmo(weapon.state.mag,weapon.state.reserve);hud.setScore(score());hud.setVitals(rules.health,rules.selected);
  const seconds=rules.phase==='BUY'?'READY':Math.max(0,Math.ceil((rules.planted?35:100)-rules.time))+'s';
  const objective=rules.planted?'HOLD UPLINK':rules.progress>0?'ARMING '+Math.floor(rules.progress/3*100)+'%':'WEST RELAY · HOLD E';
  status.textContent=`R${String(rules.round).padStart(2,'0')} · ${rules.phase} · ${seconds} · $${rules.credits} · HP ${Math.ceil(rules.health)} · ${rules.kills} K · ${rules.wins}W ${rules.losses}L · ${objective}`;
@@ -146,10 +149,17 @@ function frame(now){
  renderer.render(scene,camera);
 }
 function runShot(name){
- hud.hideOverlay();player.state.position.set(0,0,9.5);
+ hud.hideOverlay();document.getElementById('shot-label').hidden=false;player.state.position.set(0,0,9.5);
  if(name==='start'){hud.showOverlay('start',0);aimAt(new THREE.Vector3(0,1.5,-5));}
  else{
   rules.deploy();for(let i=0;i<90;i++)tick(1/60);aimAt(targets.aimPoint(0));
+  if(name==='play'){
+   const target=targets.items[0];player.state.position.set(target.group.position.x+1.8,0,target.group.position.z+2.5);aimAt(targets.aimPoint(0));
+   targets.damage(target.torso,14);hud.hitMarker(false,60000);weapon.pullTrigger();weapon.takeRound();weapon.step(0);
+   const p=target.group.position.clone().add(new THREE.Vector3(0,2.15,0));scene.updateMatrixWorld(true);p.project(camera);
+   hud.damageNumber(14,(p.x+1)*innerWidth/2,(1-p.y)*innerHeight/2,60000);
+  }
+  if(name==='relay'){player.state.position.set(-5,0,-6);aimAt(relay.position);}
   if(name==='end'){rules.finish(true,'Uplink complete. Sector secured.');hud.showOverlay('end',score());}
  }
  updateHud();syncCamera();frozen=true;

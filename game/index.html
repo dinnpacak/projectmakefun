@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IRON MERIDIAN | Relay Yard</title>
 <style>
-  /* Look plan: canvas, surface, hairline, ink, muted and one accent. Every colour below is one of the six. */
+  /* Base interface layout; voxel garden theme overrides follow below. */
   :root {
     --canvas: #0d171b;
     --surface: #21383d;
@@ -152,6 +152,23 @@
   @media (prefers-reduced-motion: reduce) {
     #hitmarker, #play { transition-duration: 0.01ms; }
   }
+  /* Voxel garden interface: high contrast readouts over a bright arena. */
+  :root { --canvas:#72cff3; --surface:#28558b; --hairline:#79c7ec; --ink:#fff; --muted:#d5efff; --accent:#ffcf47; --radius-panel:16px; }
+  #round-objective { top:88px; padding:8px 14px; border:0; border-radius:8px; background:#234970dd; font-size:11px; letter-spacing:.02em; }
+  #health { position:absolute; top:24px; left:26px; width:190px; padding:10px 13px; border:3px solid white; border-radius:12px; background:#28558be8; box-shadow:0 4px 0 #24446a60; font-weight:900; }
+  #health strong { float:right; } #health-track { height:12px; margin-top:8px; background:#193650; border-radius:3px; overflow:hidden; } #health-fill { height:100%; width:100%; background:#82e451; }
+  #sectors { position:absolute; top:19px; left:50%; transform:translateX(-50%); display:flex; gap:7px; }
+  #sectors span { width:42px; height:42px; display:grid; place-items:center; border:3px solid #fff; border-radius:8px; background:#3589d0; font-size:23px; font-weight:900; box-shadow:0 4px 0 #24446a40; }
+  #sectors span:nth-child(2n) { background:#a45add; } #sector-caption { position:absolute; top:67px; left:50%; transform:translateX(-50%); font-size:10px; letter-spacing:.18em; color:#234970; font-weight:900; }
+  #inventory { position:absolute; bottom:22px; left:50%; transform:translateX(-50%); display:flex; gap:8px; }
+  .slot { width:115px; padding:8px 10px; border:2px solid #ffffffaa; border-radius:9px; background:#244970d9; font-size:11px; color:#deefff; } .slot b { display:block; font-size:13px; color:white; margin:5px 0; } .slot.selected { border-color:#ffdb50; box-shadow:0 0 0 2px #ffdb5040; background:#326aaaed; } .slot small { opacity:.8; }
+  .gun-icon { display:block; height:10px; width:48px; background:#ffcd47; border-right:18px solid #24395b; margin:8px 0 9px; box-shadow:8px 5px 0 -2px #fff; }
+  #damage-number { position:fixed; color:#ff3e4e; font-size:40px; font-weight:1000; -webkit-text-stroke:1px #fff; text-shadow:2px 3px #7f2449; transform:translate(-50%,-100%); display:none; }
+  #damage-number.show { display:block; } #shot-label { position:absolute; right:24px; top:25px; background:#254c79dd; border-radius:6px; padding:7px 10px; font-size:11px; font-weight:800; }
+  #ammo { right:26px; bottom:28px; font-weight:900; font-size:48px; text-shadow:0 3px #234970; } #score { left:26px; bottom:30px; background:#28558bdc; border-radius:9px; padding:12px; color:#d5efff; }
+  #buy-menu { top:145px; border:2px solid #fff7; border-radius:10px; background:#28558be8; }
+  .overlay { background:#22466645; backdrop-filter:blur(3px); } .panel { border:3px solid white; box-shadow:0 10px 0 #24446a55; } .panel h1 { font-weight:1000; } #play { font-weight:900; border-radius:10px; box-shadow:0 4px 0 #c28a22; } #crosshair { filter:drop-shadow(0 1px 2px #234970); }
+  @media(max-width:800px) { #health { top:12px;left:12px;width:138px;font-size:11px;padding:7px; } #sectors { top:12px;gap:4px; } #sectors span { width:29px;height:30px;font-size:17px;border-width:2px; } #sector-caption { top:49px;font-size:8px; } #round-objective { top:65px;font-size:9px;max-width:96vw;white-space:normal;text-align:center; } #inventory { bottom:12px;gap:4px; } .slot { width:82px;padding:5px;font-size:9px; } .slot b { font-size:10px; } #score { left:12px;bottom:14px;font-size:10px;padding:7px; } #ammo { right:12px;bottom:15px;font-size:33px; } #ammo-reserve { font-size:12px; } #buy-menu { top:110px;left:12px;padding:10px;font-size:10px; } .panel { padding:20px;max-height:94vh;overflow:auto; } .keys { margin-top:14px;font-size:11px;gap:5px; } .panel p { font-size:13px;margin-bottom:15px; } #shot-label { right:12px;top:12px;font-size:8px; } }
 </style>
 </head>
 <body>
@@ -159,6 +176,10 @@
 <div id="round-objective"></div><div id="buy-menu"><b>FIELD ARMORY</b><br>[1] Relay Rifle · $2700<br>[2] Pulse SMG · $1400<br>[3] Breach Shotgun · $1900<br>[G] Arc grenade · $450<br><small>Buy before deploying · Hold E at west relay for 3s</small></div><div id="damage-flash">UNDER FIRE</div>
 
 <div id="hud" aria-hidden="true">
+  <div id="health">HEALTH <strong id="health-value">100</strong><div id="health-track"><div id="health-fill"></div></div></div>
+  <div id="sectors" aria-label="Sector map labels"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span></div><div id="sector-caption">RELAY YARD · SECTORS</div>
+  <div id="inventory"><div class="slot selected" data-weapon="rifle">1<span class="gun-icon"></span><b>RELAY RIFLE</b><small>$2700 · setup</small></div><div class="slot" data-weapon="smg">2<span class="gun-icon"></span><b>PULSE SMG</b><small>$1400 · setup</small></div><div class="slot" data-weapon="shotgun">3<span class="gun-icon"></span><b>BREACH</b><small>$1900 · setup</small></div></div>
+  <div id="damage-number"></div><div id="shot-label" hidden>STAGED PREVIEW</div>
   <div id="crosshair"><i></i><i></i><i></i><i></i></div>
   <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
   <div id="ammo"><span id="ammo-mag">30</span><span id="ammo-reserve">/ 90</span></div>

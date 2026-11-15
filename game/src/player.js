@@ -48,7 +48,7 @@ export function createPlayer(colliders) {
     player.yaw += yawKick;
   }
 
-  function step(dt, keys) {
+  function step(dt, keys, analog = {moveX:0,moveY:0}) {
     const crouching = keys.has('ControlLeft') || keys.has('ControlRight') || keys.has('KeyC');
     if (crouching && !player.crouching) {
       player.crouching = true;
@@ -60,13 +60,14 @@ export function createPlayer(colliders) {
     const eyeTarget = player.crouching ? CROUCH_EYE : STAND_EYE;
     player.eye += (eyeTarget - player.eye) * Math.min(1, dt * 12);
 
-    const forward = (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0);
-    const strafe = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0);
+    const forward = (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0) + analog.moveY;
+    const strafe = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0) + analog.moveX;
     wish.set(0, 0, 0);
     if (forward || strafe) {
       const sin = Math.sin(player.yaw);
       const cos = Math.cos(player.yaw);
-      wish.set(-sin * forward + cos * strafe, 0, -cos * forward - sin * strafe).normalize();
+      wish.set(-sin * forward + cos * strafe, 0, -cos * forward - sin * strafe);
+      if(wish.lengthSq()>1) wish.normalize();
     }
 
     const speed = player.crouching ? CROUCH_SPEED : WALK_SPEED;

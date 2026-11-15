@@ -1,8 +1,6 @@
-// The look plan, in one place. Six values and one accent hue; the lighting makes every
-// shade the game needs, so no other colour appears in the code. The same six names are
-// the CSS custom properties in index.html.
+// Shared sky palette; world and character materials use the voxel garden colors.
 export const PALETTE = {
-  canvas: '#0d171b',
+  canvas: '#72cff3',
   surface: '#21383d',
   hairline: '#2c323a',
   ink: '#e9e6df',
