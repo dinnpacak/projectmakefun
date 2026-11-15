@@ -20,7 +20,7 @@ export function createTargets(scene){
   torso.userData.target=item; head.userData.target=item; hitMeshes.push(torso,head); items.push(item);
  }
  function damage(mesh,amount){const item=mesh.userData.target;if(!item||!item.alive)return false;item.health-=amount;if(item.health>0)return false;item.alive=false;item.fall=0;item.respawnAt=now+RESPAWN_SECONDS;return true;}
- function step(dt,time,playerPos){now=time;for(const item of items){if(!item.alive){item.fall=Math.min(1,item.fall+dt/FALL_SECONDS);item.group.rotation.x=-item.fall*1.4;item.group.position.y=-item.fall*.1;if(time>=item.respawnAt){item.alive=true;item.health=HEALTH;item.fall=0;item.group.rotation.x=0;item.group.position.copy(item.home);}continue;}
+ function step(dt,time,playerPos){now=time;for(const item of items){if(!item.alive){item.fall=Math.min(1,item.fall+dt/FALL_SECONDS);item.group.rotation.x=-item.fall*1.4;item.group.position.y=-item.fall*.1;continue;}
    item.group.position.y=0; const lane=item.waypoint===1?2.7:-2.7, dx=lane-item.group.position.x, dz=-4.4-item.group.position.z, d=Math.hypot(dx,dz)||1;
    item.group.position.x+=dx/d*dt*.85; item.group.position.z+=dz/d*dt*.85; if(d<.6)item.waypoint*=-1;
    const px=playerPos.x-item.group.position.x,pz=playerPos.z-item.group.position.z,dist=Math.hypot(px,pz); item.group.rotation.y=Math.atan2(-px,-pz);
